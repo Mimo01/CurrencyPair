@@ -4,23 +4,22 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBidsTable extends Migration
-{
+class CreateBidsTable extends Migration {
     /**
      * Run the migrations.
      *
      * @return void
      */
-    public function up()
-    {
-        Schema::create('bids', function (Blueprint $table) {
+    public function up() {
+        Schema::create( 'bids', function ( Blueprint $table ) {
             $table->id();
-            $table->string('currency_from', 5);
-            $table->string('currency_to', 5);
-            $table->double('amount');
-            $table->integer('price');
+            $table->string( 'currency_from', 5 );
+            $table->string( 'currency_to', 5 );
+            $table->double( 'amount' );
+            $table->integer( 'price' );
+            $table->boolean( 'selling' );
             $table->timestamps();
-        });
+        } );
     }
 
     /**
@@ -28,8 +27,7 @@ class CreateBidsTable extends Migration
      *
      * @return void
      */
-    public function down()
-    {
-        Schema::dropIfExists('bids');
+    public function down() {
+        Schema::dropIfExists( 'bids' );
     }
 }
