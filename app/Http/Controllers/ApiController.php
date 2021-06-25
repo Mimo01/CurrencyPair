@@ -37,18 +37,21 @@ class ApiController extends Controller {
         return $this->currencyFrom . '_' . $this->currencyTo;
     }
 
-    public function getOrderBook() {
-        $requestUrl = $this->url . 'orderBook?' . http_build_query( [
-                'currencyPair'      => $this->getCurrencyPair(),
-                'groupByPriceLimit' => true
-            ] );
-        $ch         = curl_init();
+    /**
+     * Make api call on provided url
+     *
+     * @param string $url
+     *
+     * @return mixed|null
+     */
+    private static function callApi( string $url ) {
+        $ch = curl_init();
         curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
         curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 5 );
         curl_setopt( $ch, CURLOPT_TIMEOUT, 5 );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 
-        curl_setopt( $ch, CURLOPT_URL, $requestUrl );
+        curl_setopt( $ch, CURLOPT_URL, $url );
         curl_setopt( $ch, CURLOPT_HTTPHEADER, [ "Content-Type: application/x-www-form-urlencoded" ] );
 
         $response  = curl_exec( $ch );
@@ -59,8 +62,33 @@ class ApiController extends Controller {
 
         if ( $error ) {
             error_log( "Error $errorCode: $error" );
+
+            return null;
         }
 
-        return json_decode($response);
+        return json_decode( $response );
+    }
+
+    /**
+     * Get order book
+     *
+     * @return array [asks, bids]
+     */
+    public function getOrderBook(): array {
+        $requestUrl = $this->url . 'orderBook?' . http_build_query( [
+                'currencyPair'      => $this->getCurrencyPair(),
+                'groupByPriceLimit' => true
+            ] );
+        $response   = $this->callApi( $requestUrl );
+        if ( ! $response ) {
+            return [ 'asks' => [], 'bids' => [] ];
+        }
+        if ( $response->error ) {
+            error_log( $response->errorMessage );
+
+            return [ 'asks' => [], 'bids' => [] ];
+        }
+
+        return [ 'asks' => $response->data->asks, 'bids' => $response->data->bids ];
     }
 }

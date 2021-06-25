@@ -78,10 +78,8 @@ class RunProgram extends Command {
 
     private function nextCall() {
         $orderBook = $this->api->getOrderBook();
-        $askData   = $orderBook->data->asks;
-        $bidData   = $orderBook->data->bids;
-        $asks      = $this->parseBids( $askData, false );
-        $bids      = $this->parseBids( $bidData, true );
+        $asks      = $this->parseBids( $orderBook['asks'], false );
+        $bids      = $this->parseBids( $orderBook['bids'], true );
         $best      = [ 'ask' => $this->findBest( $asks ), 'bid' => $this->findBest( $bids ) ];
         foreach ( $best as $bid ) {
             if ( $bid ) {
@@ -95,9 +93,9 @@ class RunProgram extends Command {
      * Execute the console command.
      */
     public function handle() {
-        while (true) {
+        while ( true ) {
             $this->nextCall();
-            sleep($this->argument('seconds'));
+            sleep( $this->argument( 'seconds' ) );
         }
     }
 }
