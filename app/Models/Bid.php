@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Bid extends Model
-{
+class Bid extends Model {
     use HasFactory;
 
     /**
@@ -21,4 +20,12 @@ class Bid extends Model
         'price',
         'selling'
     ];
+
+    public function is_sufficient(): bool {
+        return $this->price * $this->amount > 500;
+    }
+
+    public function __toString() {
+        return ($this->selling ? 'Bid' : 'Ask') . " $this->currency_from $this->currency_to: amount - $this->amount, price - $this->price";
+    }
 }
