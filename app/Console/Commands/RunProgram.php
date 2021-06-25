@@ -80,7 +80,7 @@ class RunProgram extends Command {
         $orderBook = $this->api->getOrderBook();
         $asks      = $this->parseBids( $orderBook['asks'], false );
         $bids      = $this->parseBids( $orderBook['bids'], true );
-        $best      = [ 'ask' => $this->findBest( $asks ), 'bid' => $this->findBest( $bids ) ];
+        $best      = [ 'ask' => self::findBest( $asks ), 'bid' => self::findBest( $bids ) ];
         foreach ( $best as $bid ) {
             if ( $bid ) {
                 $bid->save();

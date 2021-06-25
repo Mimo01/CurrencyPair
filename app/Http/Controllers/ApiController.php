@@ -70,6 +70,18 @@ class ApiController extends Controller {
     }
 
     /**
+     * Create formatted response
+     *
+     * @param array $asks
+     * @param array $bids
+     *
+     * @return array [asks, bids]
+     */
+    private static function createOrderBookResponse( array $asks = [], array $bids = [] ): array {
+        return [ 'asks' => $asks, 'bids' => $bids ];
+    }
+
+    /**
      * Get order book
      *
      * @return array [asks, bids]
@@ -79,16 +91,16 @@ class ApiController extends Controller {
                 'currencyPair'      => $this->getCurrencyPair(),
                 'groupByPriceLimit' => true
             ] );
-        $response   = $this->callApi( $requestUrl );
+        $response   = self::callApi( $requestUrl );
         if ( ! $response ) {
-            return [ 'asks' => [], 'bids' => [] ];
+            return self::createOrderBookResponse();
         }
         if ( $response->error ) {
             error_log( $response->errorMessage );
 
-            return [ 'asks' => [], 'bids' => [] ];
+            return self::createOrderBookResponse();
         }
 
-        return [ 'asks' => $response->data->asks, 'bids' => $response->data->bids ];
+        return self::createOrderBookResponse( $response->data->asks, $response->data->bids );
     }
 }
