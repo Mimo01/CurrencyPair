@@ -70,16 +70,13 @@ class RunProgram extends Command {
      *
      * @return Bid|null
      */
-    private function findBest( array $bids ): ?Bid {
+    private static function findBest( array $bids ): ?Bid {
         return array_reduce( $bids, function ( $best, $next ) {
             return ( $best ? $best->get_value() : 0 ) > $next->get_value() ? $best : $next;
         }, null );
     }
 
-    /**
-     * Execute the console command.
-     */
-    public function handle() {
+    private function nextCall() {
         $orderBook = $this->api->getOrderBook();
         $askData   = $orderBook->data->asks;
         $bidData   = $orderBook->data->bids;
@@ -91,6 +88,16 @@ class RunProgram extends Command {
                 $bid->save();
                 $this->info( $bid );
             }
+        }
+    }
+
+    /**
+     * Execute the console command.
+     */
+    public function handle() {
+        while (true) {
+            $this->nextCall();
+            sleep($this->argument('seconds'));
         }
     }
 }
