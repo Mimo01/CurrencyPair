@@ -26,6 +26,7 @@ class RunProgram extends Command {
     // bad constants, should be put somewhere else
     private $currencyFrom = 'BTC';
     private $currencyTo = 'EUR';
+    private $minValue = 500;
 
     /**
      * Create a new command instance.
@@ -54,12 +55,25 @@ class RunProgram extends Command {
             $bid->price         = $data->price;
             $bid->amount        = $data->amount;
             $bid->selling       = $selling;
-            if ( $bid->is_sufficient() ) {
+            if ( $bid->get_value() > $this->minValue ) {
                 $result[] = $bid;
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Find bid with highest value
+     *
+     * @param array $bids
+     *
+     * @return Bid|null
+     */
+    private function findBest( array $bids ): ?Bid {
+        return array_reduce( $bids, function ( $best, $next ) {
+            return ( $best ? $best->get_value() : 0 ) > $next->get_value() ? $best : $next;
+        }, null );
     }
 
     /**
@@ -69,13 +83,14 @@ class RunProgram extends Command {
         $orderBook = $this->api->getOrderBook();
         $askData   = $orderBook->data->asks;
         $bidData   = $orderBook->data->bids;
-        $result    = array_merge( $this->parseBids( $askData, false ), $this->parseBids( $bidData, true ) );
-        array_filter( $result, function ( $bid ) {
-            return $bid->is_sufficient();
-        } );
-        foreach ( $result as $bid ) {
-            $bid->save();
-            $this->info( $bid );
+        $asks      = $this->parseBids( $askData, false );
+        $bids      = $this->parseBids( $bidData, true );
+        $best      = [ 'ask' => $this->findBest( $asks ), 'bid' => $this->findBest( $bids ) ];
+        foreach ( $best as $bid ) {
+            if ( $bid ) {
+                $bid->save();
+                $this->info( $bid );
+            }
         }
     }
 }

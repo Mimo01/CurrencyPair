@@ -21,8 +21,8 @@ class Bid extends Model {
         'selling'
     ];
 
-    public function is_sufficient(): bool {
-        return $this->price * $this->amount > 500;
+    public function get_value(): int {
+        return $this->price * $this->amount;
     }
 
     public function __toString() {
